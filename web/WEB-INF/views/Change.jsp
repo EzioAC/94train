@@ -128,7 +128,7 @@
         <div class="col-xs-4">
                     <div>
                         <ul class="nav nav-pills">
-                            <li><label><h3 class="white">Hi,${sessionScope.get("S_Username")}</h3></label></li>
+                            <li><label><h3 class="white">Hi,${sessionScope.get("S_Name")}</h3></label></li>
                             <li>&nbsp;&nbsp;</li>
                             <li style="margin-top: 10px;"><form method="post" action="/registerAndLogin/LogOut.do"><input type="submit" class="btn btn-warning" value="退出登录"></form></li>
                         </ul>

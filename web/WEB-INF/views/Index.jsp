@@ -56,7 +56,7 @@
 
                 <div class="form-group">
                     <h4><strong>日期</strong></h4>
-                    <label><input id='mydatepicker' class="form-control" placeholder="点击以选择日期"/></label>
+                    <label><input id="mydatepicker" class="form-control" placeholder="点击以选择日期"/></label>
                 </div>
 
                 <div class="form-group">
@@ -89,21 +89,6 @@
                             <th style="width:15%;">操作</th>
                         </tr>
                         </thead>
-                        <tbody id="template" style="display: none;">
-                            <tr>
-                                <th class="_StrainID"></th>
-                                <td class="_StartStation"></td>
-                                <td class="_EndStation"></td>
-                                <td class="_DepartureTime"></td>
-                                <td class="_ArrivalTime"></td>
-                                <td class="_TimeSpent"></td>
-                                <td class="_CountLeft"></td>
-                                <td class="_price"></td>
-                                <td>
-                                    <button type="button" class="btn btn-primary btn-sm get-train">购买</button>
-                                </td>
-                            </tr>
-                        </tbody>
                         <tbody id="dataGrid"></tbody>
                     </table>
 
@@ -111,6 +96,25 @@
             </div>
         </div>
     </div>
+
+    <!--车票模板，不显示-->
+    <table style="display: none;">
+        <tbody id="template" style="display: none;">
+        <tr>
+            <th class="_StrainID"></th>
+            <td class="_StartStation"></td>
+            <td class="_EndStation"></td>
+            <td class="_DepartureTime"></td>
+            <td class="_ArrivalTime"></td>
+            <td class="_TimeSpent"></td>
+            <td class="_CountLeft"></td>
+            <td class="_price"></td>
+            <td>
+                <button type="button" class="btn btn-primary btn-sm get-train">购买</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
     <!-- 图片左右方来回滚动图片的左右箭头-->
     <a href="#myCarousel" class="carousel-control left" data-slide="prev">&lsaquo;</a>
@@ -128,6 +132,21 @@
 
 <script type="text/javascript">
     $(function () {
+        // Autocomplete部分
+        var availableTags = null;
+        $.getJSON("/search/getAllStations.do",function(result){
+
+            $( "#departure" ).autocomplete({
+                source: result
+            });
+            $( "#destination" ).autocomplete({
+                source: result
+            });
+        });
+
+        var trainTable = $("#trainTable").DataTable();
+
+        // 车票查询-显示部分
         var searchForm = $("#searchForm");
         var dataGrid = $("#dataGrid");
         var template = $("#template").children();
@@ -136,62 +155,209 @@
                 "/search/searchTrains.do",
                 searchForm.serializeArray(),
                 function (data) {
-                    dataGrid.empty();
-                    $.each(data, function (index, row) {
-                        var tr = template.clone();
-                        dataGrid.append(tr);
-                        $.each(row, function (name, value) {
-                            tr.find("._" + name).text(value);
-                        })
-                    });
 
-                    $("#trainTable").DataTable();
+                    var currentDate = new Date();
+                    var currentyear = currentDate.getFullYear();
+                    var currentmonth = currentDate.getMonth() + 1;
+                    var currentdate= currentDate.getDate();
 
-                    $(".get-train").click(function () {
-                        // 验证是否登录
-                        var S_ID = '<%=session.getAttribute("S_ID")%>';
-                        if (S_ID.toString() === "null" || S_ID === "") {
-                            alert("请先登录");
-                            return false;
-                        }
+                    var searchDate = document.getElementById("mydatepicker").value;
+                    var year = searchDate.substr(0,4);
+                    var month = searchDate.substr(5,2).replace("0","");
+                    var day = searchDate.substr(8,2).replace("0","");
 
-                        var item = $(this).parent().parent();
-                        var strainID = item.find("._StrainID").html();
-                        var startStation = item.find("._StartStation").html();
-                        var endStation = item.find("._EndStation").html();
-                        var departureTime = item.find("._DepartureTime").html();
-                        var arrivalTime = item.find("._ArrivalTime").html();
-                        var timeSpent = item.find("._TimeSpent").html();
-                        var countLeft = item.find("._CountLeft").html();
-                        var price = item.find("._price").html();
-                        var params = {"strainID":strainID,
-                                      "startStation":startStation,
-                                      "endStation":endStation,
-                                      "departureTime":departureTime,
-                                      "arrivalTime":arrivalTime,
-                                      "timeSpent":timeSpent,
-                                      "countLeft":countLeft,
-                                      "price":price};
-                        //$.get("/buyTickets/buyTickets.do",data);
-                        var form = document.createElement("form");
-                        form.setAttribute("method", "get");
-                        form.setAttribute("action", "/buyTickets/buyTickets.do");
+                    if(currentyear < year){
+                        trainTable.destroy();
+                        dataGrid.empty();
+                        $.each(data, function (index, row) {
+                            var tr = template.clone();
+                            dataGrid.append(tr);
+                            $.each(row, function (name, value) {
+                                tr.find("._" + name).text(value);
+                            })
+                        });
 
-                        for(var key in params) {
-                            if(params.hasOwnProperty(key)) {
-                                var hiddenField = document.createElement("input");
-                                hiddenField.setAttribute("type", "hidden");
-                                hiddenField.setAttribute("name", key);
-                                hiddenField.setAttribute("value", params[key]);
-
-                                form.appendChild(hiddenField);
+                        $(".get-train").click(function () {
+                            // 验证是否登录
+                            var S_ID = '<%=session.getAttribute("S_ID")%>';
+                            if (S_ID.toString() === "null" || S_ID === "") {
+                                alert("请先登录");
+                                return false;
                             }
+
+                            var item = $(this).parent().parent();
+                            var strainID = item.find("._StrainID").html();
+                            var startStation = item.find("._StartStation").html();
+                            var endStation = item.find("._EndStation").html();
+                            var departureTime = item.find("._DepartureTime").html();
+                            var arrivalTime = item.find("._ArrivalTime").html();
+                            var timeSpent = item.find("._TimeSpent").html();
+                            var countLeft = item.find("._CountLeft").html();
+                            var price = item.find("._price").html();
+                            var params = {"strainID":strainID,
+                                "startStation":startStation,
+                                "endStation":endStation,
+                                "departureTime":departureTime,
+                                "arrivalTime":arrivalTime,
+                                "timeSpent":timeSpent,
+                                "countLeft":countLeft,
+                                "price":price};
+                            //$.get("/buyTickets/buyTickets.do",data);
+                            var form = document.createElement("form");
+                            form.setAttribute("method", "get");
+                            form.setAttribute("action", "/buyTickets/buyTickets.do");
+
+                            for(var key in params) {
+                                if(params.hasOwnProperty(key)) {
+                                    var hiddenField = document.createElement("input");
+                                    hiddenField.setAttribute("type", "hidden");
+                                    hiddenField.setAttribute("name", key);
+                                    hiddenField.setAttribute("value", params[key]);
+
+                                    form.appendChild(hiddenField);
+                                }
+                            }
+
+                            document.body.appendChild(form);
+                            form.submit();
+
+                        });
+
+                        trainTable = $("#trainTable").DataTable({
+                            "lengthMenu": [ 5, 10, 15]
+                        });
+
+                    }
+                    else if(currentyear == year){
+                        if(currentmonth < month){
+                            trainTable.destroy();
+                            dataGrid.empty();
+                            $.each(data, function (index, row) {
+                                var tr = template.clone();
+                                dataGrid.append(tr);
+                                $.each(row, function (name, value) {
+                                    tr.find("._" + name).text(value);
+                                })
+                            });
+
+                            $(".get-train").click(function () {
+                                // 验证是否登录
+                                var S_ID = '<%=session.getAttribute("S_ID")%>';
+                                if (S_ID.toString() === "null" || S_ID === "") {
+                                    alert("请先登录");
+                                    return false;
+                                }
+
+                                var item = $(this).parent().parent();
+                                var strainID = item.find("._StrainID").html();
+                                var startStation = item.find("._StartStation").html();
+                                var endStation = item.find("._EndStation").html();
+                                var departureTime = item.find("._DepartureTime").html();
+                                var arrivalTime = item.find("._ArrivalTime").html();
+                                var timeSpent = item.find("._TimeSpent").html();
+                                var countLeft = item.find("._CountLeft").html();
+                                var price = item.find("._price").html();
+                                var params = {"strainID":strainID,
+                                    "startStation":startStation,
+                                    "endStation":endStation,
+                                    "departureTime":departureTime,
+                                    "arrivalTime":arrivalTime,
+                                    "timeSpent":timeSpent,
+                                    "countLeft":countLeft,
+                                    "price":price};
+                                //$.get("/buyTickets/buyTickets.do",data);
+                                var form = document.createElement("form");
+                                form.setAttribute("method", "get");
+                                form.setAttribute("action", "/buyTickets/buyTickets.do");
+
+                                for(var key in params) {
+                                    if(params.hasOwnProperty(key)) {
+                                        var hiddenField = document.createElement("input");
+                                        hiddenField.setAttribute("type", "hidden");
+                                        hiddenField.setAttribute("name", key);
+                                        hiddenField.setAttribute("value", params[key]);
+
+                                        form.appendChild(hiddenField);
+                                    }
+                                }
+
+                                document.body.appendChild(form);
+                                form.submit();
+
+                            });
+
+                            trainTable = $("#trainTable").DataTable({
+                                "lengthMenu": [ 5, 10, 15]
+                            });
                         }
+                        else if(currentmonth == month){
+                            if(currentdate < day){
+                                trainTable.destroy();
+                                dataGrid.empty();
+                                $.each(data, function (index, row) {
+                                    var tr = template.clone();
+                                    dataGrid.append(tr);
+                                    $.each(row, function (name, value) {
+                                        tr.find("._" + name).text(value);
+                                    })
+                                });
 
-                        document.body.appendChild(form);
-                        form.submit();
+                                $(".get-train").click(function () {
+                                    // 验证是否登录
+                                    var S_ID = '<%=session.getAttribute("S_ID")%>';
+                                    if (S_ID.toString() === "null" || S_ID === "") {
+                                        alert("请先登录");
+                                        return false;
+                                    }
 
-                    });
+                                    var item = $(this).parent().parent();
+                                    var strainID = item.find("._StrainID").html();
+                                    var startStation = item.find("._StartStation").html();
+                                    var endStation = item.find("._EndStation").html();
+                                    var departureTime = item.find("._DepartureTime").html();
+                                    var arrivalTime = item.find("._ArrivalTime").html();
+                                    var timeSpent = item.find("._TimeSpent").html();
+                                    var countLeft = item.find("._CountLeft").html();
+                                    var price = item.find("._price").html();
+                                    var params = {"strainID":strainID,
+                                        "startStation":startStation,
+                                        "endStation":endStation,
+                                        "departureTime":departureTime,
+                                        "arrivalTime":arrivalTime,
+                                        "timeSpent":timeSpent,
+                                        "countLeft":countLeft,
+                                        "price":price};
+                                    //$.get("/buyTickets/buyTickets.do",data);
+                                    var form = document.createElement("form");
+                                    form.setAttribute("method", "get");
+                                    form.setAttribute("action", "/buyTickets/buyTickets.do");
+
+                                    for(var key in params) {
+                                        if(params.hasOwnProperty(key)) {
+                                            var hiddenField = document.createElement("input");
+                                            hiddenField.setAttribute("type", "hidden");
+                                            hiddenField.setAttribute("name", key);
+                                            hiddenField.setAttribute("value", params[key]);
+
+                                            form.appendChild(hiddenField);
+                                        }
+                                    }
+
+                                    document.body.appendChild(form);
+                                    form.submit();
+
+                                });
+
+                                trainTable = $("#trainTable").DataTable({
+                                    "lengthMenu": [ 5, 10, 15]
+                                });
+                            }
+                            else alert("选择的日期不合法！");
+                        }
+                        else alert("选择的日期不合法！");
+                    }
+                    else alert("选择的日期不合法！");
+
                 }, "json");
             return false;
         });

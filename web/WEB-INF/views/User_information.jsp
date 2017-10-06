@@ -12,17 +12,6 @@
 
 <jsp:include page="common/IncludeTop.jsp"/>
 
-<style type="text/css">
-    *{margin:0;padding:0;}
-    .dev,.con{float: left; margin-top: 20px;}
-    .personalInfo{background: #563d7c; padding-left: 15px;font-size: 16px;font-weight: bold;line-height: 40px;color:#cdbcf3 }
-    .dev ul li{font-size: 14px;padding-left: 35px;line-height: 40px;display: block;border-bottom: 1px solid #e2e2e2;cursor: pointer;}
-    .dev ul li:hover{background-color: #f7f7f7 ;}
-    .on{background-image: url(xx.png); background-repeat: no-repeat; background-position: 15px 13px;font-weight: bold;}
-    .nrbf{width:inherit;float: left; display: none; padding-left: 20px; color: #464646;letter-spacing:1px; font-size: 16px;line-height: 1.5; padding-top: 5px;}
-</style>
-
-
 <div class="container" style="width: 80%">
     <div class="row">
         <%
@@ -51,10 +40,17 @@
     <div class="row">
         <div class="col-xs-1 dev">
             <p class="personalInfo">个人信息</p>
-            <ul id="myInfo" >
-                <a href="#base" data-toggle="tab"><li class="active">基本信息</li></a>
-                <a href="#change" data-toggle="tab"><li>修改信息</li></a>
-                <a href="#order" data-toggle="tab"> <li>我的订单</li></a><!--xj-->
+            <ul id="myInfo" class="nav nav-tabs">
+
+                <li class="active">
+                    <a href="#base" data-toggle="tab">基本信息</a>
+                </li>
+                <li>
+                    <a href="#change" data-toggle="tab">修改信息</a>
+                </li>
+                <li>
+                    <a href="#order" data-toggle="tab">我的订单</a>
+                </li>
             </ul>
         </div>
         <div class="col-xs-11 con">
@@ -132,13 +128,6 @@
                     </div>
                 </div>
 
-
-
-
-
-
-
-
                 <div class="tab-pane fade" id="order">
 
                     <ul id="myOrd" class="nav nav-tabs">
@@ -147,20 +136,20 @@
                         <li><a href="#noPay" data-toggle="tab">待付款订单</a></li>
                     </ul>
 
-                    <div id="query" style="margin-top: 10px;">
-                        <span><label>订单号<input type="text" id="orderID"/></label></span>
-                        <span><label>日期</label></span>
-                        <span>
-                                <input type="text" id="StartDate" placeholder="yyyy-mm-dd" value="2017-09-14" readonly="readonly"/>
-                                <input type="text" id="EndDate" placeholder="yyyy-mm-dd" value="2017-09-14" readonly="readonly"/>
-                            <!--这里需要点击输入框显示一个日历的div，用于选择时间-->
-                            </span>
-                        <span>
-                            <input type="text" id="sequeue_train_nameText" value="" placeholder="订单/车次/乘车人姓名"/>
-                            <span id="clear_input_txt" title="清除"></span><!--这里可以添加一个删除的小图标-->
-                            </span>
-                        <input type="button" id="querybt" value="查询"/>
-                    </div>
+                    <%--<div id="query" style="margin-top: 10px;">--%>
+                        <%--<span><label>订单号<input id="orderID"/></label></span>--%>
+                        <%--<span><label>日期</label></span>--%>
+                        <%--<span>--%>
+                                <%--<input type="text" id="StartDate" placeholder="yyyy-mm-dd" value="2017-09-14" readonly="readonly"/>--%>
+                                <%--<input type="text" id="EndDate" placeholder="yyyy-mm-dd" value="2017-09-14" readonly="readonly"/>--%>
+                            <%--<!--这里需要点击输入框显示一个日历的div，用于选择时间-->--%>
+                            <%--</span>--%>
+                        <%--<span>--%>
+                            <%--<input type="text" id="sequeue_train_nameText" value="" placeholder="订单/车次/乘车人姓名"/>--%>
+                            <%--<span id="clear_input_txt" title="清除"></span><!--这里可以添加一个删除的小图标-->--%>
+                            <%--</span>--%>
+                        <%--<input type="button" id="querybt" value="查询"/>--%>
+                    <%--</div>--%>
 
                     <div id="noticketlist" style="display: none;">
                         <div id="no-ticket">
@@ -171,12 +160,9 @@
                         </div>
                     </div>
 
-
-
                     <div id="myOrderContent" class="tab-content">
                         <div class="tab-pane fade in active" id="all">
                             <table class="table table-bordered table-striped table-hover" id="orderInfoALL">
-
                                 <tr align="center">
                                     <td>序号</td>
                                     <td>订单号</td>
@@ -211,8 +197,8 @@
 
                                     <td class="_operation">
                                         <button type="button" onclick="acs(this)" class="btn btn-dange btn-xs" >删除</button>
-                                        <button type="button" class="btn btn-warning btn-xs" >退订</button>
-                                        <button type="button" class="btn btn-success btn-xs" >付款</button>
+                                        <button type="button" onclick="returnTicket(this)" class="btn btn-warning btn-xs" >退订</button>
+                                        <button type="button" onclick="buyTicket(this)" class="btn btn-success btn-xs" >付款</button>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -317,6 +303,7 @@
     var noPay = $("#ordersNopay");
     $(function () {
         PostID();
+
     });
     function PostID() {
         $("#ordershow").hidden;
@@ -332,6 +319,8 @@
                     var tr = order.clone();
                     var tr2;
                     var tr3;
+                    var count1 = 1;
+                    var count2 = 1;
                     dataGrid.append(tr);
                     $.each(row, function (name, value) {
 
@@ -340,18 +329,22 @@
                             if(name=="status"){
                                 if(value==1) {
                                     tr.find("._status").text("已完成");
-                                    alert(tr.children().last().children().eq(2).attr("disabled","disabled"));
+                                    tr.children().last().children().eq(2).attr("disabled","disabled");
 
                                 }
                                 if(value==0){
-                                    tr.find("._status").text("未完成");
-
+                                    tr.find("._status").text("未出行");
+                                    tr.children().last().children().eq(2).attr("disabled","disabled");
                                     tr2 = tr.clone();
+                                    tr2.find("._id").text(count1);
+                                    count1++;
                                 }
                                 if(value==-1){
                                     tr.find("._status").text("未支付");
-                                    alert(tr.children().last().children().eq(1).attr("disabled","disabled"));
+                                    tr.children().last().children().eq(1).attr("disabled","disabled");
                                     tr3 = tr.clone();
+                                    tr3.find("._id").text(count2);
+                                    count2++;
                                 }
                             }
                     })
@@ -370,11 +363,16 @@
 
     function acs(obj) {
         var params = {}
-        var $td= $(obj).parents('tr').children('td').eq(1).text();
+        var $td = $(obj).parents('tr').children('td').eq(1).text();
+        var $trainid = $(obj).parents('tr').children('td').eq(2).text();
+        var $start = $(obj).parents('tr').children('td').eq(8).text();
+        var $end = $(obj).parents('tr').children('td').eq(9).text();
 
         params.id = $td;
-
-        if(confirm("确定要删除此订单码？")){
+        params.trainid = $trainid;
+        params.start = $start;
+        params.end = $end;
+        if(confirm("确定要删除此订单吗？")){
             window.event.returnValue = true;
         }else{
             window.event.returnValue = false;
@@ -387,14 +385,91 @@
                 data:params,
                 dataType:"json",
                 success:function (data) {
-                    alert("a");
+
                 },
                 error:function () {
-                    alert("gsxgh");
+
                     PostID();
                 }
             })
         }
         return false;
     }
+
+    function returnTicket(obj) {
+        var params = {}
+        var $td= $(obj).parents('tr').children('td').eq(1).text();
+
+        params.id = $td;
+        params.status = -1;
+
+        if(confirm("确定要退款码？")){
+            window.event.returnValue = true;
+        }else{
+            window.event.returnValue = false;
+        }
+
+        if(window.event.returnValue == true){
+            $.ajax({
+                url:"/Order/returnTicket.do",
+                type:"post",
+                data:params,
+                dataType:"json",
+                success:function (data) {
+
+                },
+                error:function () {
+
+                    PostID();
+                }
+            })
+        }
+        return false;
+    }
+
+    function buyTicket(obj) {
+        var params = {}
+        var $td= $(obj).parents('tr').children('td').eq(1).text();
+
+        params.id = $td;
+        params.status = 0;
+
+        if(confirm("确定要付款码？")){
+            window.event.returnValue = true;
+        }else{
+            window.event.returnValue = false;
+        }
+
+        if(window.event.returnValue == true){
+            $.ajax({
+                url:"/Order/buyTicket.do",
+                type:"post",
+                data:params,
+                dataType:"json",
+                success:function (data) {
+
+                },
+                error:function () {
+
+                    PostID();
+                }
+            })
+        }
+        return false;
+    }
+</script>
+
+<script>
+    $(document).ready(function() {
+        if(location.hash) {
+            $('a[href=' + location.hash + ']').tab('show');
+        }
+        $(document.body).on("click", "a[data-toggle]", function(event) {
+            location.hash = this.getAttribute("href");
+        });
+    });
+    $(window).on('popstate', function() {
+        var anchor = location.hash || $("a[data-toggle=tab]").first().attr("href");
+        $('a[href=' + anchor + ']').tab('show');
+    });
 </script>

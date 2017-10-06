@@ -154,7 +154,7 @@ public class TicketService {
         return id;
     }
 
-    public  static boolean BuyTicket(int UserID,TrainTable trainTable)
+    public  static boolean BuyTicket(int UserID,TrainTable trainTable, int type)
     {
         Order order = new Order();
         order.setUserID(UserID);
@@ -163,7 +163,7 @@ public class TicketService {
         order.setEndStation(trainTable.getEndStation());
         order.setDepartureTime(trainTable.getDepartureTime());
         order.setArrivalTime(trainTable.getArrivalTime());
-        order.setStatus(0);
+        order.setStatus(type);
         order.setType(0);
         order.setPrice(trainTable.getPrice());
         int i = 0;
@@ -194,6 +194,30 @@ public class TicketService {
         if(i==1)
             return true;
         return false;
+    }
+
+    public static List<String> GetStationName()
+    {
+
+        List<String> list = new ArrayList<>() ;
+
+        Connection conn = ConnectionGenerator.GetConnetct();
+        String sql = " SELECT StationName FROM 94train.station;";
+        PreparedStatement pstmt;
+        try {
+            pstmt = (PreparedStatement) conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next())
+            {
+                list.add(rs.getString(1));
+            }
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     public static boolean TicketCountChange(TrainTable trainTable,int count)

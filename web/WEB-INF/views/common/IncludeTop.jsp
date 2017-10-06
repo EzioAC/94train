@@ -15,6 +15,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/dcalendar.picker.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/train.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/dataTables.bootstrap.min.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/jquery-ui.css">
     </head>
 
 <body>
@@ -34,8 +35,8 @@
                     {
                 %>
                 <div>
-                    <a class="btn btn-link navbar-btn" href="${pageContext.request.contextPath}/registerAndLogin/viewLogin.do"><h3>登录</h3></a>
-                    <a class="btn btn-link navbar-btn" href="${pageContext.request.contextPath}/registerAndLogin/viewRegister.do"><h3>注册</h3></a>
+                    <a class="btn btn-lin navbar-btn" href="${pageContext.request.contextPath}/registerAndLogin/viewLogin.do"><h3>登录</h3></a>
+                    <a class="btn btn-lin navbar-btn" href="${pageContext.request.contextPath}/registerAndLogin/viewRegister.do"><h3>注册</h3></a>
                 </div>
                 <%
                 }
@@ -43,13 +44,13 @@
                     {
                 %>
                 <div>
-                    <ul class="nav nav-pills">
+
+                    <ol class="nav nav-pills">
                         <li><label><h3 class="white">Hi,<a href="${pageContext.request.contextPath}/user/viewUserInfo.do" class="white">${sessionScope.get("S_Name")}</a></h3></label></li>
                         <li>&nbsp;&nbsp;</li>
-                        <li><a class="btn btn-success" href="${pageContext.request.contextPath}/index/viewIndex.do">我要买票</a></li>
-                        <li><form method="post" action="/registerAndLogin/LogOut.do"><input  class="btn btn-warning" type="submit" value="退出登录"></form></li>
-
-                    </ul>
+                        <li><form style="margin-top: 15px"><a class="btn btn-success" href="${pageContext.request.contextPath}/index/viewIndex.do">我要买票</a></form></li>
+                        <li><form style="margin-top: 15px" method="post" action="/registerAndLogin/LogOut.do"><input  class="btn btn-warning" type="submit" value="退出登录"></form></li>
+                    </ol>
                 </div>
                 <%
                     }
